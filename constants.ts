@@ -1,6 +1,19 @@
-const env = process.env.NODE_ENV
+import { styleText } from 'util'
 
-const URL_CONSTANTS = {
+const theme = {
+  icon: {
+    cursor: '👉',
+  },
+  style: {
+    highlight: (text: string) => {
+      const numberSubstring = text.match(/\s\(#\d+\)/)?.[0] ?? ''
+      const rest = text.slice(0, text.length - numberSubstring.length)
+      return styleText('green', rest) + styleText('gray', numberSubstring)
+    },
+  },
+}
+
+const urlConstants = {
   base: 'https://tpg-dev-portal-server.fly.dev',
   testBase: 'http://localhost:3000/',
   owner: 'nookworth',
@@ -8,4 +21,4 @@ const URL_CONSTANTS = {
   review: 'review-message',
 }
 
-export { URL_CONSTANTS }
+export { theme, urlConstants }

@@ -1,8 +1,9 @@
 import { select } from '@inquirer/prompts'
 import { fetchPRs } from './utils'
-import { URL_CONSTANTS } from './constants'
+import { urlConstants } from './constants'
 import { exec } from 'child_process'
-import { styleText } from 'util'
+import { theme } from './constants'
+import './webSocket'
 
 const proceed = await select({
   message: 'Would you like to fetch PRs?',
@@ -24,7 +25,7 @@ if (!proceed) {
 }
 
 /** @todo pass some arg into the app when starting it to know which URL to use */
-const prs = await fetchPRs(URL_CONSTANTS.testBase)
+const prs = await fetchPRs(urlConstants.testBase)
 const displayInfo = prs.map(({ number, title, url }) => ({
   number,
   title,
@@ -37,27 +38,15 @@ const prChoice = await select({
     name: `${title} (#${number})`,
     value: number,
   })),
-  theme: {
-    icon: {
-      cursor: '👉',
-    },
-    style: {
-      highlight: (text: string) => {
-        const numberSubstring = text.match(/\s\(#\d+\)/)?.[0] ?? ''
-        const rest = text.slice(0, text.length - numberSubstring.length)
-        return styleText('green', rest) + styleText('gray', numberSubstring)
-      },
-    },
-  },
+  theme,
 })
 
 const checkSuites = prs.find(({ number }) => number === prChoice)?.checkSuites
 const displayCheckSuites = checkSuites.map(
   ({ app, status, conclusion }) => `[${app}] ${status} - ${conclusion}`
 )
-console.log(' --- Check Suites ---')
-console.group()
-console.group()
+
+console.group('Checks ✅')
 console.table(displayCheckSuites.join('\n'))
 console.groupEnd()
 
@@ -65,18 +54,23 @@ const actionChoice = await select({
   message: 'Select an action:',
   choices: [
     {
-      name: 'Visit PR URL',
-      value: 'url',
-    },
-    {
       name: 'Post to Slack',
       value: 'slack',
     },
     {
-      name: 'Merge PR',
+      name: 'Re-run Checks',
+      value: 'rerun',
+    },
+    {
+      name: 'Merge',
       value: 'merge',
     },
+    {
+      name: 'Open GitHub',
+      value: 'url',
+    },
   ],
+  theme,
 })
 
 if (actionChoice === 'url') {

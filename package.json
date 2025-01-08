@@ -5,7 +5,8 @@
   "type": "module",
   "dependencies": {
     "@inquirer/prompts": "^7.2.1",
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
