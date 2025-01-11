@@ -41,7 +41,7 @@ const prChoice = await select({
   theme,
 })
 
-const selectedPR = await fetchSinglePR(true, prChoice as number)
+const selectedPR = await fetchSinglePR(prChoice as number)
 const { mergeable } = selectedPR
 
 const actionChoice = await select({
@@ -90,7 +90,7 @@ switch (actionChoice) {
   }
   case 'slack': {
     const { url, title } = displayInfo.find(({ number }) => number === prChoice)
-    const response = await postToSlack(true, {
+    const response = await postToSlack({
       title,
       url,
     })

@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "tsx ./portal.ts"
+    "dev": "tsx ./portal.ts true",
+    "prod": "tsx ./portal.ts false"
   },
   "type": "module",
   "dependencies": {

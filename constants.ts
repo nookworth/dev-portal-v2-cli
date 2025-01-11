@@ -1,5 +1,7 @@
 import { styleText } from 'util'
 
+const devMode = process.argv[2]
+
 const theme = {
   icon: {
     cursor: '👉',
@@ -14,11 +16,12 @@ const theme = {
 }
 
 const urlConstants = {
-  base: 'https://tpg-dev-portal-server.fly.dev',
-  testBase: 'http://localhost:3000',
+  domain: devMode
+    ? 'http://localhost:3000'
+    : 'https://tpg-dev-portal-server.fly.dev',
   owner: 'nookworth',
   repo: 'tpg-dev-portal',
   review: 'review-message',
 }
 
-export { theme, urlConstants }
+export { devMode, theme, urlConstants }

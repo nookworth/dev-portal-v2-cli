@@ -1,13 +1,11 @@
 import axios from 'axios'
 import { urlConstants } from './constants'
 
-const { base, testBase } = urlConstants
+const { domain } = urlConstants
 
-/**@todo find a way to determine the environment */
-export const fetchPRs = async (test: boolean = true) => {
-  const url = test ? testBase : base
+export const fetchPRs = async () => {
   try {
-    const response = await axios.get(url)
+    const response = await axios.get(domain)
     return response.data
   } catch (error) {
     if (error.response) {
@@ -21,11 +19,9 @@ export const fetchPRs = async (test: boolean = true) => {
   }
 }
 
-export const fetchSinglePR = async (test: boolean = true, prNumber: number) => {
-  const url = test ? testBase : base
-
+export const fetchSinglePR = async (prNumber: number) => {
   try {
-    const response = await axios.get(`${url}/${prNumber}`)
+    const response = await axios.get(`${domain}/${prNumber}`)
     return response.data
   } catch (error) {
     if (error.response) {
@@ -39,17 +35,9 @@ export const fetchSinglePR = async (test: boolean = true, prNumber: number) => {
   }
 }
 
-export const postToSlack = async (
-  test: boolean = true,
-  body: {
-    title: string
-    url: string
-  }
-) => {
-  const url = test ? testBase : base
+export const postToSlack = async (body: { title: string; url: string }) => {
   try {
-    const response = await axios.post(`${url}/review-message`, body)
-    console.log({ response })
+    const response = await axios.post(`${domain}/review-message`, body)
     return response.data
   } catch (error) {
     if (error.response) {

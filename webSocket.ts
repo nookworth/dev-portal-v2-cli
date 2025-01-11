@@ -1,7 +1,11 @@
 import { WebSocket } from 'ws'
 import { styleText } from 'util'
+import { devMode } from './constants'
 
-const ws = new WebSocket('ws://localhost:3000')
+const url = devMode
+  ? 'ws://localhost:3000'
+  : 'wss://tpg-dev-portal-server.fly.dev'
+const ws = new WebSocket(url)
 
 ws.onopen = async () => {
   const onOpenMessage = styleText('gray', '(websocket connected)')
