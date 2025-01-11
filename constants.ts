@@ -15,7 +15,7 @@ const theme = {
 
 const urlConstants = {
   base: 'https://tpg-dev-portal-server.fly.dev',
-  testBase: 'http://localhost:3000/',
+  testBase: 'http://localhost:3000',
   owner: 'nookworth',
   repo: 'tpg-dev-portal',
   review: 'review-message',

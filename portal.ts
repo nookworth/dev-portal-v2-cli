@@ -1,6 +1,5 @@
 import { select } from '@inquirer/prompts'
-import { fetchPRs } from './utils'
-import { urlConstants } from './constants'
+import { fetchPRs, fetchSinglePR, postToSlack } from './utils'
 import { exec } from 'child_process'
 import { theme } from './constants'
 import './webSocket'
@@ -25,30 +24,25 @@ if (!proceed) {
 }
 
 /** @todo pass some arg into the app when starting it to know which URL to use */
-const prs = await fetchPRs(urlConstants.testBase)
-const displayInfo = prs.map(({ number, title, url }) => ({
+const prs = await fetchPRs()
+const displayInfo = prs.map(({ number, status, title, url }) => ({
   number,
+  status,
   title,
   url,
 }))
 
 const prChoice = await select({
   message: 'Select a PR for more actions:',
-  choices: displayInfo.map(({ number, title }) => ({
+  choices: displayInfo.map(({ number, status, title }) => ({
     name: `${title} (#${number})`,
     value: number,
   })),
   theme,
 })
 
-const checkSuites = prs.find(({ number }) => number === prChoice)?.checkSuites
-const displayCheckSuites = checkSuites.map(
-  ({ app, status, conclusion }) => `[${app}] ${status} - ${conclusion}`
-)
-
-console.group('Checks ✅')
-console.table(displayCheckSuites.join('\n'))
-console.groupEnd()
+const selectedPR = await fetchSinglePR(true, prChoice as number)
+const { mergeable } = selectedPR
 
 const actionChoice = await select({
   message: 'Select an action:',
@@ -58,12 +52,9 @@ const actionChoice = await select({
       value: 'slack',
     },
     {
-      name: 'Re-run Checks',
-      value: 'rerun',
-    },
-    {
       name: 'Merge',
       value: 'merge',
+      disabled: !mergeable,
     },
     {
       name: 'Open GitHub',
@@ -73,26 +64,35 @@ const actionChoice = await select({
   theme,
 })
 
-if (actionChoice === 'url') {
-  const prUrl = displayInfo.find(({ number }) => number === prChoice)?.url
+switch (actionChoice) {
+  case 'url': {
+    const prUrl = displayInfo.find(({ number }) => number === prChoice)?.url
 
-  if (prUrl) {
-    // Determine the platform and execute the appropriate command
-    const command =
-      process.platform === 'win32'
-        ? `start "" "${prUrl}"` // Windows
-        : process.platform === 'darwin'
-        ? `open "${prUrl}"` // macOS
-        : `xdg-open "${prUrl}"` // Linux
+    if (prUrl) {
+      // Determine the platform and execute the appropriate command
+      const command =
+        process.platform === 'win32'
+          ? `start "" "${prUrl}"` // Windows
+          : process.platform === 'darwin'
+          ? `open "${prUrl}"` // macOS
+          : `xdg-open "${prUrl}"` // Linux
 
-    exec(command, error => {
-      if (error) {
-        console.error('Failed to open URL:', error.message)
-      } else {
-        console.log(`Opened URL: ${prUrl}`)
-      }
+      exec(command, error => {
+        if (error) {
+          console.error('Failed to open URL:', error.message)
+        } else {
+          console.log(`Opened URL: ${prUrl}`)
+        }
+      })
+    } else {
+      console.error('No matching PR URL found for the selected choice.')
+    }
+  }
+  case 'slack': {
+    const { url, title } = displayInfo.find(({ number }) => number === prChoice)
+    const response = await postToSlack(true, {
+      title,
+      url,
     })
-  } else {
-    console.error('No matching PR URL found for the selected choice.')
   }
 }
