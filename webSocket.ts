@@ -2,9 +2,10 @@ import { WebSocket } from 'ws'
 import { styleText } from 'util'
 import { devMode } from './constants'
 
-const url = devMode
-  ? 'ws://localhost:3000'
-  : 'wss://tpg-dev-portal-server.fly.dev'
+const url =
+  devMode === 'true'
+    ? 'ws://localhost:3000'
+    : 'wss://tpg-dev-portal-server.fly.dev'
 const ws = new WebSocket(url)
 
 ws.onopen = async () => {
