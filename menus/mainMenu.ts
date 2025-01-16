@@ -1,27 +1,28 @@
 import { select } from '@inquirer/prompts'
 import { fetchPRs } from '../utils'
-import { cache, theme } from '../constants'
+import { cache, PR, theme } from '../constants'
 
 export const mainMenu = async () => {
-  const prs = await fetchPRs()
-  const prData = prs.map(({ number, status, title, url }) => ({
-    number,
-    status,
-    title,
-    url,
-  }))
-
-  // initialize cache with fetched data, will be updated later with webhook data
   if (!cache.prs) {
+    const prs = await fetchPRs()
+    const prData = prs.map(({ number, status, title, url }: PR) => ({
+      number,
+      status,
+      title,
+      url,
+    }))
     cache.prs = prData
   }
 
-  const prChoice = await select({
+  const prOptions = cache.prs?.map(({ number, title }) => ({
+    name: `${title} (#${number})`,
+    value: number,
+  }))
+  const choices = (prOptions ?? []).concat([{ name: 'Exit', value: 0 }])
+
+  const prChoice: number = await select({
     message: 'Select a PR for more actions:',
-    choices: prData.map(({ number, title }) => ({
-      name: `${title} (#${number})`,
-      value: number,
-    })),
+    choices,
     theme,
   })
 

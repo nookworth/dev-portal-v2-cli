@@ -1,7 +1,14 @@
 import { styleText } from 'util'
 
+type PR = {
+  number: number
+  status: string
+  title: string
+  url: string
+}
+
 type Cache = {
-  prs?: { number: number; title: string; status: string; url: string }[]
+  prs?: PR[]
   prDetails?: { [key: number]: any }
 }
 
@@ -32,4 +39,5 @@ const urlConstants = {
   review: 'review-message',
 }
 
+export type { PR, Cache }
 export { cache, devMode, theme, urlConstants }
