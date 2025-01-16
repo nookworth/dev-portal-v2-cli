@@ -1,45 +1,11 @@
 import { select } from '@inquirer/prompts'
 import { fetchPRs, fetchSinglePR, postToSlack } from './utils'
 import { exec } from 'child_process'
-import { theme } from './constants'
+import { cache, theme } from './constants'
+import { mainMenu } from './menus/mainMenu'
 import './webSocket'
 
-const proceed = await select({
-  message: 'Would you like to fetch PRs?',
-  choices: [
-    {
-      name: 'Yes',
-      value: true,
-    },
-    {
-      name: 'No',
-      value: false,
-    },
-  ],
-})
-
-if (!proceed) {
-  console.log('Goodbye 👋')
-  process.exit(0)
-}
-
-/** @todo pass some arg into the app when starting it to know which URL to use */
-const prs = await fetchPRs()
-const displayInfo = prs.map(({ number, status, title, url }) => ({
-  number,
-  status,
-  title,
-  url,
-}))
-
-const prChoice = await select({
-  message: 'Select a PR for more actions:',
-  choices: displayInfo.map(({ number, status, title }) => ({
-    name: `${title} (#${number})`,
-    value: number,
-  })),
-  theme,
-})
+const prChoice = await mainMenu()
 
 const selectedPR = await fetchSinglePR(prChoice as number)
 const { mergeable } = selectedPR
@@ -66,7 +32,7 @@ const actionChoice = await select({
 
 switch (actionChoice) {
   case 'url': {
-    const prUrl = displayInfo.find(({ number }) => number === prChoice)?.url
+    const prUrl = cache.prs?.find(({ number }) => number === prChoice)?.url
 
     if (prUrl) {
       // Determine the platform and execute the appropriate command
@@ -89,10 +55,13 @@ switch (actionChoice) {
     }
   }
   case 'slack': {
-    const { url, title } = displayInfo.find(({ number }) => number === prChoice)
-    const response = await postToSlack({
-      title,
-      url,
-    })
+    const { url, title } =
+      cache.prs?.find(({ number }) => number === prChoice) ?? {}
+    if (title && url) {
+      const response = await postToSlack({
+        title,
+        url,
+      })
+    }
   }
 }

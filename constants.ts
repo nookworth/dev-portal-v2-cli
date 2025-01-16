@@ -1,5 +1,12 @@
 import { styleText } from 'util'
 
+type Cache = {
+  prs?: { number: number; title: string; status: string; url: string }[]
+  prDetails?: { [key: number]: any }
+}
+
+const cache: Cache = {}
+
 const devMode = process.argv[2]
 
 const theme = {
@@ -25,4 +32,4 @@ const urlConstants = {
   review: 'review-message',
 }
 
-export { devMode, theme, urlConstants }
+export { cache, devMode, theme, urlConstants }
