@@ -1,5 +1,10 @@
 import { styleText } from 'util'
 
+enum SlackActions {
+  post = 'post',
+  delete = 'delete',
+}
+
 const devMode = process.argv[2]
 
 const theme = {
@@ -16,12 +21,14 @@ const theme = {
 }
 
 const urlConstants = {
-  domain: devMode
-    ? 'http://localhost:3000'
-    : 'https://tpg-dev-portal-server.fly.dev',
+  domain:
+    devMode === 'true'
+      ? 'http://localhost:8080'
+      : 'https://tpg-dev-portal-server.fly.dev',
   owner: 'nookworth',
   repo: 'tpg-dev-portal',
   review: 'review-message',
 }
 
-export { devMode, theme, urlConstants }
+export type { SlackActions }
+export { devMode, SlackActions as SlackActionsEnum, theme, urlConstants }
