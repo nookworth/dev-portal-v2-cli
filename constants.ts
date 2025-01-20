@@ -32,7 +32,7 @@ const theme = {
 const urlConstants = {
   domain:
     devMode === 'true'
-      ? 'http://localhost:3000'
+      ? 'http://localhost:8080'
       : 'https://tpg-dev-portal-server.fly.dev',
   owner: 'nookworth',
   repo: 'tpg-dev-portal',
