@@ -4,6 +4,8 @@ import { mainMenu, prActions } from './menus'
 import { exec } from 'child_process'
 import { cache } from './cache'
 import { writeFileSync } from 'fs'
+import path from 'node:path'
+import { homedir } from 'os'
 
 const { domain } = urlConstants
 
@@ -147,7 +149,13 @@ export const resolveActionChoice = async (
 
 export const saveCache = () => {
   try {
-    writeFileSync('cache.json', JSON.stringify(cache, null, 2), { flag: 'w' })
+    writeFileSync(
+      path.join(homedir(), '.portal-cache.json'),
+      JSON.stringify(cache, null, 2),
+      {
+        flag: 'w',
+      }
+    )
   } catch (error) {
     console.error('ERROR WRITING CACHE\n', error)
   }

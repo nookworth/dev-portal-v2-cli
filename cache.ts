@@ -1,4 +1,6 @@
 import { readFileSync, existsSync } from 'fs'
+import path from 'node:path'
+import { homedir } from 'os'
 
 type PR = {
   mergeable?: boolean
@@ -14,8 +16,10 @@ type PRCache = {
   prs: PR[]
 }
 
-const cache: PRCache = existsSync('./cache.json')
-  ? JSON.parse(readFileSync('./cache.json', 'utf-8'))
+const cache: PRCache = existsSync(path.join(homedir(), '.portal-cache.json'))
+  ? JSON.parse(
+      readFileSync(path.join(homedir(), '.portal-cache.json'), 'utf-8')
+    )
   : {
       prs: [],
     }
