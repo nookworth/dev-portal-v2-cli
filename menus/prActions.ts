@@ -3,22 +3,35 @@ import { fetchSinglePR } from '../utils'
 import { cache, theme } from '../constants'
 
 export const prActions = async (prChoice: number) => {
-  if (!cache.prDetails?.[prChoice]) {
-    const selectedPR = await fetchSinglePR(prChoice)
-    cache.prDetails = {
-      ...cache.prDetails,
-      [prChoice]: selectedPR,
-    }
+  const cachedPr = cache.prs?.find(pr => pr.number === prChoice)
+  if (!cachedPr) {
+    const fetchedPR = await fetchSinglePR(prChoice)
+    const { mergeable, number, status, title, url } = fetchedPR
+    cache.prs = cache.prs.concat({
+      mergeable,
+      number,
+      postedToSlack: false,
+      status,
+      title,
+      url,
+    })
+    // means the PR was fetched in the main menu, which uses GH's "List Pull Requests" API, which does not return mergeable status
+  } else if (cachedPr.mergeable === null || cachedPr.mergeable === undefined) {
+    const fetchedPR = await fetchSinglePR(prChoice)
+    const { mergeable } = fetchedPR
+    cachedPr.mergeable = mergeable
+    cachedPr.postedToSlack = false
   }
 
-  const selectedPR = cache.prDetails[prChoice]
-  const { mergeable } = selectedPR
+  const selectedPR = cache.prs?.find(pr => pr.number === prChoice)
+  const { mergeable, postedToSlack } = selectedPR ?? {}
+  const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
 
   const actionChoice = await select({
     message: 'Select an action:',
     choices: [
       {
-        name: 'Post to Slack',
+        name: slackOption,
         value: 'slack',
       },
       {

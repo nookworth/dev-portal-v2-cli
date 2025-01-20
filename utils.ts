@@ -5,6 +5,16 @@ import { exec } from 'child_process'
 
 const { domain } = urlConstants
 
+export const deleteSlackPost = async (ts: string) => {
+  const response = await axios.delete(`${domain}/review-message`, {
+    data: {
+      ts,
+    },
+  })
+  const { status, data } = response ?? {}
+  return { status, data }
+}
+
 export const fetchPRs = async () => {
   try {
     const response = await axios.get(domain)
@@ -40,7 +50,8 @@ export const fetchSinglePR = async (prNumber: number) => {
 export const postToSlack = async (body: { title: string; url: string }) => {
   try {
     const response = await axios.post(`${domain}/review-message`, body)
-    return response.data
+    const { status, data } = response
+    return { status, data }
   } catch (error) {
     if (error.response) {
       console.error(`HTTP Error: ${error.response.status}`)
@@ -60,22 +71,48 @@ export const resolveActionChoice = async (
   switch (actionChoice) {
     case 'back': {
       const prChoice = await mainMenu()
+
       if (prChoice === 0) {
         console.log('Goodbye 👋')
         process.exit(0)
       }
+
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
     case 'slack': {
-      const { url, title } =
-        cache.prs?.find(({ number }) => number === prChoice) ?? {}
-      if (title && url) {
-        await postToSlack({
+      const cachedPr = cache.prs?.find(({ number }) => number === prChoice)
+      if (!cachedPr) {
+        console.error('No cached PR found for the selected choice.')
+        return
+      }
+      const { postedToSlack, reviewTs, url, title } = cachedPr
+
+      if (title && url && !postedToSlack) {
+        const response = await postToSlack({
           title,
           url,
         })
+        const {
+          status,
+          data: { ts },
+        } = response ?? {}
+        if (status === 200) {
+          cachedPr.postedToSlack = true
+          cachedPr.reviewTs = ts
+        } else {
+          console.error('Error posting to Slack')
+        }
+      } else if (postedToSlack) {
+        const { status } = await deleteSlackPost(reviewTs ?? '')
+        if (status === 200) {
+          cachedPr.postedToSlack = false
+          cachedPr.reviewTs = undefined
+        } else {
+          console.error('Error deleting Slack post')
+        }
       }
+
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
