@@ -1,6 +1,7 @@
 import { select } from '@inquirer/prompts'
 import { fetchSinglePR } from '../utils'
-import { cache, theme } from '../constants'
+import { theme } from '../constants'
+import { cache } from '../cache'
 
 export const prActions = async (prChoice: number) => {
   const cachedPr = cache.prs?.find(pr => pr.number === prChoice)

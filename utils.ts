@@ -1,7 +1,9 @@
 import axios from 'axios'
-import { cache, urlConstants } from './constants'
+import { urlConstants } from './constants'
 import { mainMenu, prActions } from './menus'
 import { exec } from 'child_process'
+import { cache } from './cache'
+import { writeFileSync } from 'fs'
 
 const { domain } = urlConstants
 
@@ -131,8 +133,6 @@ export const resolveActionChoice = async (
         exec(command, error => {
           if (error) {
             console.error('Failed to open URL:', error.message)
-          } else {
-            console.log(`Opened URL: ${prUrl}`)
           }
         })
       } else {
@@ -142,5 +142,13 @@ export const resolveActionChoice = async (
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
+  }
+}
+
+export const saveCache = () => {
+  try {
+    writeFileSync('cache.json', JSON.stringify(cache, null, 2), { flag: 'w' })
+  } catch (error) {
+    console.error('ERROR WRITING CACHE\n', error)
   }
 }

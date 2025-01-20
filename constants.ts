@@ -1,27 +1,8 @@
 import { styleText } from 'util'
 
-type PR = {
-  mergeable?: boolean
-  number: number
-  postedToSlack?: boolean
-  reviewTs?: string
-  status: string
-  title: string
-  url: string
-}
-
-type Cache = {
-  prs: PR[]
-  // prDetails?: { [key: number]: any }
-}
-
 enum SlackActions {
   post = 'post',
   delete = 'delete',
-}
-
-const cache: Cache = {
-  prs: [],
 }
 
 const devMode = process.argv[2]
@@ -49,5 +30,5 @@ const urlConstants = {
   review: 'review-message',
 }
 
-export type { PR, Cache, SlackActions }
-export { cache, devMode, SlackActions as SlackActionsEnum, theme, urlConstants }
+export type { SlackActions }
+export { devMode, SlackActions as SlackActionsEnum, theme, urlConstants }
