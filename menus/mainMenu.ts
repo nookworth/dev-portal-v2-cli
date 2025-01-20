@@ -1,6 +1,9 @@
 import { select } from '@inquirer/prompts'
 import { fetchPRs } from '../utils'
-import { cache, PR, theme } from '../constants'
+import { theme } from '../constants'
+import { cache } from '../cache'
+import type { PR } from '../cache'
+import { saveCache } from '../utils'
 
 export const mainMenu = async () => {
   if (!cache.prs.length) {
@@ -29,3 +32,10 @@ export const mainMenu = async () => {
 
   return prChoice
 }
+
+process.on('exit', saveCache)
+
+process.on('SIGINT', () => {
+  saveCache()
+  process.exit(0)
+})
