@@ -6,7 +6,16 @@ enum SlackActions {
 }
 
 const devMode = process.argv[2]
-const newPRMessage = 'New PR from current branch'
+const goodbyeMessages = [
+  'Goodbye 👋',
+  'See you later 👋',
+  'Au revoir 👋',
+  'Auf wiedersehen 👋',
+  'Have a great day 👋',
+  'So long and thanks for all the fish 👋',
+  'Adios 👋',
+]
+const newPRMessage = 'New pull request from HEAD'
 
 const theme = {
   icon: {
@@ -14,12 +23,15 @@ const theme = {
   },
   style: {
     highlight: (text: string) => {
+      const isExit = text.includes('Exit')
       const isNewPR = text.includes(newPRMessage)
       const numberSubstring = text.match(/\s\(#\d+\)/)?.[0] ?? ''
       const rest = text.slice(0, text.length - numberSubstring.length)
-      return isNewPR
-        ? styleText('yellow', text)
-        : styleText('green', rest) + styleText('gray', numberSubstring)
+      return isExit
+        ? styleText('redBright', text)
+        : isNewPR
+        ? styleText('greenBright', text)
+        : styleText('yellowBright', rest) + styleText('gray', numberSubstring)
     },
   },
 }
@@ -37,6 +49,7 @@ const urlConstants = {
 export type { SlackActions }
 export {
   devMode,
+  goodbyeMessages,
   newPRMessage,
   SlackActions as SlackActionsEnum,
   theme,

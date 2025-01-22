@@ -3,6 +3,7 @@ import { fetchPRs, resolveActionChoice } from './utils'
 import { cache, PR } from './cache'
 import process from 'node:process'
 import { styleText } from 'util'
+import { goodbyeMessages } from './constants'
 import './events'
 import './webSocket'
 
@@ -21,7 +22,7 @@ try {
   if (!cache.prs.length) {
     cache.prs = prData
   } else {
-    // if an existing PR has changed, update those properties
+    // if an existing PR has changed, update its properties
     cache.prs = prData.map(({ number, status, title, url }) => {
       const existingPr = cache.prs.find(p => p.number === number)
       if (existingPr) {
@@ -40,7 +41,9 @@ try {
 const prChoice = await mainMenu()
 
 if (prChoice === 0) {
-  console.log('Goodbye 👋')
+  console.log(
+    goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)]
+  )
   process.exit(0)
 }
 
