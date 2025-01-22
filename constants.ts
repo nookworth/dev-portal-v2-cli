@@ -6,6 +6,7 @@ enum SlackActions {
 }
 
 const devMode = process.argv[2]
+const newPRMessage = 'New PR from current branch'
 
 const theme = {
   icon: {
@@ -13,9 +14,12 @@ const theme = {
   },
   style: {
     highlight: (text: string) => {
+      const isNewPR = text.includes(newPRMessage)
       const numberSubstring = text.match(/\s\(#\d+\)/)?.[0] ?? ''
       const rest = text.slice(0, text.length - numberSubstring.length)
-      return styleText('green', rest) + styleText('gray', numberSubstring)
+      return isNewPR
+        ? styleText('yellow', text)
+        : styleText('green', rest) + styleText('gray', numberSubstring)
     },
   },
 }
@@ -31,4 +35,10 @@ const urlConstants = {
 }
 
 export type { SlackActions }
-export { devMode, SlackActions as SlackActionsEnum, theme, urlConstants }
+export {
+  devMode,
+  newPRMessage,
+  SlackActions as SlackActionsEnum,
+  theme,
+  urlConstants,
+}
