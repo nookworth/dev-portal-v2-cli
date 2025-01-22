@@ -1,21 +1,8 @@
 import { select } from '@inquirer/prompts'
-import { fetchPRs } from '../utils'
 import { theme } from '../constants'
 import { cache } from '../cache'
-import type { PR } from '../cache'
 
 export const mainMenu = async () => {
-  if (!cache.prs.length) {
-    const prs = await fetchPRs()
-    const prData = prs.map(({ number, status, title, url }: PR) => ({
-      number,
-      status,
-      title,
-      url,
-    }))
-    cache.prs = prData
-  }
-
   const prOptions = cache.prs?.map(({ number, title }) => ({
     name: `${title} (#${number})`,
     value: number,
