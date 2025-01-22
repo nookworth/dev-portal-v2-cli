@@ -3,7 +3,6 @@ import { fetchPRs } from '../utils'
 import { theme } from '../constants'
 import { cache } from '../cache'
 import type { PR } from '../cache'
-import { saveCache } from '../utils'
 
 export const mainMenu = async () => {
   if (!cache.prs.length) {
@@ -32,10 +31,3 @@ export const mainMenu = async () => {
 
   return prChoice
 }
-
-process.on('exit', saveCache)
-
-process.on('SIGINT', () => {
-  saveCache()
-  process.exit(0)
-})

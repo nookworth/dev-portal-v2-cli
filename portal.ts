@@ -1,6 +1,7 @@
 import { mainMenu, prActions } from './menus'
 import { resolveActionChoice } from './utils'
 import process from 'node:process'
+import './events'
 import './webSocket'
 
 const prChoice = await mainMenu()
