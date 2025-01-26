@@ -11,6 +11,24 @@ import { readFileSync } from 'fs'
 
 const { domain } = urlConstants
 
+export const createPullRequest = async ({
+  body,
+  head,
+  title,
+}: {
+  body?: string
+  head: string
+  title: string
+}) => {
+  const response = await axios.post(`${domain}/new`, {
+    head,
+    title,
+    body,
+  })
+  const { status, data } = response ?? {}
+  return { status, data }
+}
+
 export const deleteSlackPost = async (ts: string) => {
   const response = await axios.delete(`${domain}/review-message`, {
     data: {
@@ -29,7 +47,7 @@ export const setHeadBranchName = async (cache: PortalCache) => {
 
   const fetchHeadBranchName = (pathToHead: string) => {
     const head = readFileSync(pathToHead, 'utf-8')
-    const headBranchName = head.split('ref: ')[1].split('/')[2]
+    const headBranchName = head.split('ref: ')[1].split('/')[2].trim()
     return headBranchName
   }
 
@@ -117,7 +135,7 @@ export const resolveActionChoice = async (
       await resolveActionChoice(newAction, prChoice)
     }
     case 'slack': {
-      const cachedPr = cache.prs?.find(({ number }) => number === prChoice)
+      const cachedPr = cache.prs[prChoice]
       if (!cachedPr) {
         console.error('No cached PR found for the selected choice.')
         return
@@ -153,7 +171,7 @@ export const resolveActionChoice = async (
       await resolveActionChoice(newAction, prChoice)
     }
     case 'url': {
-      const prUrl = cache.prs?.find(({ number }) => number === prChoice)?.url
+      const prUrl = cache.prs[prChoice]?.url
 
       if (prUrl) {
         // Determine the platform and execute the appropriate command

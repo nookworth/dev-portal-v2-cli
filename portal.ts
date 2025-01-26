@@ -1,4 +1,4 @@
-import { mainMenu, prActions } from './menus'
+import { createPr, mainMenu, prActions } from './menus'
 import { fetchPRs, resolveActionChoice } from './utils'
 import { cache, PR } from './cache'
 import process from 'node:process'
@@ -19,21 +19,9 @@ try {
     title,
     url,
   }))
-  if (!cache.prs.length) {
-    cache.prs = prData
-  } else {
-    // if an existing PR has changed, update its properties
-    cache.prs = prData.map(({ number, status, title, url }) => {
-      const existingPr = cache.prs.find(p => p.number === number)
-      if (existingPr) {
-        return {
-          ...existingPr,
-          ...{ status, title, url },
-        }
-      }
-      return { number, status, title, url }
-    })
-  }
+  prData.forEach(({ number, status, title, url }) => {
+    cache.prs[number] = { number, status, title, url }
+  })
 } catch (err) {
   console.error('Error fetching PRs:', err)
 }
@@ -45,7 +33,9 @@ if (prChoice === 0) {
     goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)]
   )
   process.exit(0)
+} else if (prChoice === 1000) {
+  await createPr()
+} else {
+  const actionChoice = await prActions(prChoice)
+  await resolveActionChoice(actionChoice, prChoice)
 }
-
-const actionChoice = await prActions(prChoice)
-await resolveActionChoice(actionChoice, prChoice)

@@ -7,6 +7,7 @@ import { setHeadBranchName } from '../utils'
 const mainMenu = async () => {
   await setHeadBranchName(cache)
   const newPRMessage = `New pull request from ${cache.headBranchName}`
+  const { prs: cachedPRs } = cache
 
   const mainMenuTail = [
     { name: newPRMessage, value: 1000 },
@@ -14,10 +15,14 @@ const mainMenu = async () => {
   ]
 
   const styleNumber = (number: number) => styleText('gray', `(#${number})`)
-  const prOptions = cache.prs?.map(({ number, title }) => ({
-    name: `${title} ${styleNumber(number)}`,
-    value: number,
-  }))
+  let prOptions: { name: string; value: number }[] = []
+  for (const pr in cachedPRs) {
+    const { title, number } = cachedPRs[pr]
+    prOptions.push({
+      name: `${title} ${styleNumber(number)}`,
+      value: number,
+    })
+  }
 
   const noPRs = prOptions?.length === 0
   const choices = (prOptions ?? []).concat(mainMenuTail)

@@ -15,7 +15,7 @@ type PR = {
 type PortalCache = {
   headBranchName: string | null
   pathToHead: string | null
-  prs: PR[]
+  prs: { [key: number]: PR }
 }
 
 const cache: PortalCache = existsSync(
@@ -27,7 +27,7 @@ const cache: PortalCache = existsSync(
   : {
       headBranchName: null,
       pathToHead: null,
-      prs: [],
+      prs: {},
     }
 
 export { cache }
