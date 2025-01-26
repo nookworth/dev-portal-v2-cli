@@ -20,13 +20,33 @@ export const createPullRequest = async ({
   head: string
   title: string
 }) => {
-  const response = await axios.post(`${domain}/new`, {
-    head,
-    title,
-    body,
-  })
-  const { status, data } = response ?? {}
-  return { status, data }
+  try {
+    const response = await axios.post(`${domain}/new`, {
+      head,
+      title,
+      body,
+    })
+    const { status, data } = response
+    if (status === 201) {
+      const {
+        head: { ref },
+        number,
+        title: prTitle,
+        url,
+        status: prStatus,
+      } = data ?? {}
+      cache.prs[number] = {
+        headRef: ref,
+        number,
+        title: prTitle,
+        url,
+        status: prStatus,
+      }
+    }
+    return { status, data }
+  } catch (error) {
+    console.error('Error creating PR:', error)
+  }
 }
 
 export const deleteSlackPost = async (ts: string) => {
@@ -48,6 +68,7 @@ export const setHeadBranchName = async (cache: PortalCache) => {
   const fetchHeadBranchName = (pathToHead: string) => {
     const head = readFileSync(pathToHead, 'utf-8')
     const headBranchName = head.split('ref: ')[1].split('/')[2].trim()
+    console.log('head branch name from util: ', headBranchName)
     return headBranchName
   }
 
@@ -60,12 +81,14 @@ export const setHeadBranchName = async (cache: PortalCache) => {
       const headBranchName = fetchHeadBranchName(pathToHead)
       cache.pathToHead = pathToHead
       cache.headBranchName = headBranchName
+      return headBranchName
     } catch (err) {
       console.error('Error retrieving head branch name:', err)
     }
   } else {
     const headBranchName = fetchHeadBranchName(cache.pathToHead)
     cache.headBranchName = headBranchName
+    return headBranchName
   }
 }
 

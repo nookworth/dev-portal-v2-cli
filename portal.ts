@@ -1,6 +1,6 @@
 import { createPr, mainMenu, prActions } from './menus'
 import { fetchPRs, resolveActionChoice } from './utils'
-import { cache, PR } from './cache'
+import { cache } from './cache'
 import process from 'node:process'
 import { styleText } from 'util'
 import { goodbyeMessages } from './constants'
@@ -12,16 +12,23 @@ console.log(onOpenMessage + '\n')
 
 // Fetch PRs and update cache on startup
 try {
-  const prs = await fetchPRs()
-  const prData = prs.map(({ number, status, title, url }: PR) => ({
-    number,
-    status,
-    title,
-    url,
-  }))
-  prData.forEach(({ number, status, title, url }) => {
-    cache.prs[number] = { number, status, title, url }
+  const prsFromGitHub = await fetchPRs()
+  const cachedPRs = cache.prs
+  const tempCache = {}
+  prsFromGitHub.forEach(pr => {
+    const { number, ref, status, title, url } = pr
+    tempCache[number] = { number, ref, status, title, url }
   })
+  for (const pr in cachedPRs) {
+    const latestPRData = tempCache[pr]
+    if (latestPRData) {
+      tempCache[pr] = {
+        ...cachedPRs[pr],
+        ...latestPRData,
+      }
+    }
+  }
+  cache.prs = tempCache
 } catch (err) {
   console.error('Error fetching PRs:', err)
 }

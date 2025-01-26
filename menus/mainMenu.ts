@@ -5,23 +5,32 @@ import { styleText } from 'util'
 import { setHeadBranchName } from '../utils'
 
 const mainMenu = async () => {
-  await setHeadBranchName(cache)
-  const newPRMessage = `New pull request from ${cache.headBranchName}`
   const { prs: cachedPRs } = cache
+  const cachedPrsArray = Object.entries(cachedPRs)
+  const headBranchName = await setHeadBranchName(cache)
+  const headBranchHasExistingPR = cachedPrsArray.some(
+    ([_, value]) => value && value.headRef?.trim() === headBranchName?.trim()
+  )
+  const newPRMessage = `New pull request from ${cache.headBranchName}`
+  const mainMenuTail =
+    headBranchHasExistingPR || headBranchName === 'master'
+      ? [{ name: 'Exit', value: 0 }]
+      : [
+          { name: newPRMessage, value: 1000 },
+          { name: 'Exit', value: 0 },
+        ]
+  const prOptions: { name: string; value: number }[] = []
 
-  const mainMenuTail = [
-    { name: newPRMessage, value: 1000 },
-    { name: 'Exit', value: 0 },
-  ]
+  const stylePRNumber = (number: number) => styleText('gray', `(#${number})`)
 
-  const styleNumber = (number: number) => styleText('gray', `(#${number})`)
-  let prOptions: { name: string; value: number }[] = []
   for (const pr in cachedPRs) {
-    const { title, number } = cachedPRs[pr]
-    prOptions.push({
-      name: `${title} ${styleNumber(number)}`,
-      value: number,
-    })
+    const { title, number } = cachedPRs[pr] ?? {}
+    if (title && number) {
+      prOptions.push({
+        name: `${title} ${stylePRNumber(number)}`,
+        value: number,
+      })
+    }
   }
 
   const noPRs = prOptions?.length === 0

@@ -7,8 +7,9 @@ export const prActions = async (prChoice: number) => {
   const cachedPr = cache.prs[prChoice]
   if (!cachedPr) {
     const fetchedPR = await fetchSinglePR(prChoice)
-    const { mergeable, number, status, title, url } = fetchedPR
+    const { head: { ref }, mergeable, number, status, title, url } = fetchedPR
     cache.prs[number] = {
+      headRef: ref,
       mergeable,
       number,
       postedToSlack: false,
@@ -24,7 +25,7 @@ export const prActions = async (prChoice: number) => {
     cachedPr.postedToSlack = false
   }
 
-  const { mergeable, postedToSlack } = cachedPr
+  const { mergeable, postedToSlack } = cachedPr ?? {}
   const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
 
   const actionChoice = await select({

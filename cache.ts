@@ -6,6 +6,7 @@ type PR = {
   mergeable?: boolean
   number: number
   postedToSlack?: boolean
+  headRef: string
   reviewTs?: string
   status: string
   title: string
@@ -15,7 +16,7 @@ type PR = {
 type PortalCache = {
   headBranchName: string | null
   pathToHead: string | null
-  prs: { [key: number]: PR }
+  prs: { [key: number]: PR | null }
 }
 
 const cache: PortalCache = existsSync(
