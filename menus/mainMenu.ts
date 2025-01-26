@@ -1,9 +1,13 @@
 import { select } from '@inquirer/prompts'
-import { newPRMessage, theme } from '../constants'
+import { theme } from '../constants'
 import { cache } from '../cache'
 import { styleText } from 'util'
+import { setHeadBranchName } from '../utils'
 
-export const mainMenu = async () => {
+const mainMenu = async () => {
+  await setHeadBranchName(cache)
+  const newPRMessage = `New pull request from ${cache.headBranchName}`
+
   const mainMenuTail = [
     { name: newPRMessage, value: 1000 },
     { name: 'Exit', value: 0 },
@@ -26,3 +30,5 @@ export const mainMenu = async () => {
 
   return prChoice
 }
+
+export { mainMenu }

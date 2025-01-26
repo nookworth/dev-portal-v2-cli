@@ -2,10 +2,12 @@ import axios from 'axios'
 import { urlConstants } from './constants'
 import { mainMenu, prActions } from './menus'
 import { exec } from 'child_process'
-import { cache } from './cache'
+import { cache, PortalCache } from './cache'
 import { writeFileSync } from 'fs'
 import path from 'node:path'
 import { homedir } from 'os'
+import { input } from '@inquirer/prompts'
+import { readFileSync } from 'fs'
 
 const { domain } = urlConstants
 
@@ -17,6 +19,36 @@ export const deleteSlackPost = async (ts: string) => {
   })
   const { status, data } = response ?? {}
   return { status, data }
+}
+
+export const setHeadBranchName = async (cache: PortalCache) => {
+  if (!cache) {
+    console.error('No cache found')
+    return
+  }
+
+  const fetchHeadBranchName = (pathToHead: string) => {
+    const head = readFileSync(pathToHead, 'utf-8')
+    const headBranchName = head.split('ref: ')[1].split('/')[2]
+    return headBranchName
+  }
+
+  if (!cache.pathToHead) {
+    const localRepo = await input({
+      message: `Enter the path to your local travelpass.com repo starting after your home directory:`,
+    })
+    try {
+      const pathToHead = path.join(homedir(), localRepo, '/.git/HEAD')
+      const headBranchName = fetchHeadBranchName(pathToHead)
+      cache.pathToHead = pathToHead
+      cache.headBranchName = headBranchName
+    } catch (err) {
+      console.error('Error retrieving head branch name:', err)
+    }
+  } else {
+    const headBranchName = fetchHeadBranchName(cache.pathToHead)
+    cache.headBranchName = headBranchName
+  }
 }
 
 export const fetchPRs = async () => {

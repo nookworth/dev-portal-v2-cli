@@ -12,17 +12,23 @@ type PR = {
   url: string
 }
 
-type PRCache = {
+type PortalCache = {
+  headBranchName: string | null
+  pathToHead: string | null
   prs: PR[]
 }
 
-const cache: PRCache = existsSync(path.join(homedir(), '.portal-cache.json'))
+const cache: PortalCache = existsSync(
+  path.join(homedir(), '.portal-cache.json')
+)
   ? JSON.parse(
       readFileSync(path.join(homedir(), '.portal-cache.json'), 'utf-8')
     )
   : {
+      headBranchName: null,
+      pathToHead: null,
       prs: [],
     }
 
 export { cache }
-export type { PR, PRCache }
+export type { PR, PortalCache }
