@@ -6,23 +6,30 @@ type PR = {
   mergeable?: boolean
   number: number
   postedToSlack?: boolean
+  headRef: string
   reviewTs?: string
   status: string
   title: string
   url: string
 }
 
-type PRCache = {
-  prs: PR[]
+type PortalCache = {
+  headBranchName: string | null
+  pathToHead: string | null
+  prs: { [key: number]: PR | null }
 }
 
-const cache: PRCache = existsSync(path.join(homedir(), '.portal-cache.json'))
+const cache: PortalCache = existsSync(
+  path.join(homedir(), '.portal-cache.json')
+)
   ? JSON.parse(
       readFileSync(path.join(homedir(), '.portal-cache.json'), 'utf-8')
     )
   : {
-      prs: [],
+      headBranchName: null,
+      pathToHead: null,
+      prs: {},
     }
 
 export { cache }
-export type { PR, PRCache }
+export type { PR, PortalCache }

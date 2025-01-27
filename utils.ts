@@ -2,12 +2,52 @@ import axios from 'axios'
 import { urlConstants } from './constants'
 import { mainMenu, prActions } from './menus'
 import { exec } from 'child_process'
-import { cache } from './cache'
+import { cache, PortalCache } from './cache'
 import { writeFileSync } from 'fs'
 import path from 'node:path'
 import { homedir } from 'os'
+import { input } from '@inquirer/prompts'
+import { readFileSync } from 'fs'
 
 const { domain } = urlConstants
+
+export const createPullRequest = async ({
+  body,
+  head,
+  title,
+}: {
+  body?: string
+  head: string
+  title: string
+}) => {
+  try {
+    const response = await axios.post(`${domain}/new`, {
+      head,
+      title,
+      body,
+    })
+    const { status, data } = response
+    if (status === 201) {
+      const {
+        head: { ref },
+        number,
+        title: prTitle,
+        url,
+        status: prStatus,
+      } = data ?? {}
+      cache.prs[number] = {
+        headRef: ref,
+        number,
+        title: prTitle,
+        url,
+        status: prStatus,
+      }
+    }
+    return { status, data }
+  } catch (error) {
+    console.error('Error creating PR:', error)
+  }
+}
 
 export const deleteSlackPost = async (ts: string) => {
   const response = await axios.delete(`${domain}/review-message`, {
@@ -17,6 +57,39 @@ export const deleteSlackPost = async (ts: string) => {
   })
   const { status, data } = response ?? {}
   return { status, data }
+}
+
+export const setHeadBranchName = async (cache: PortalCache) => {
+  if (!cache) {
+    console.error('No cache found')
+    return
+  }
+
+  const fetchHeadBranchName = (pathToHead: string) => {
+    const head = readFileSync(pathToHead, 'utf-8')
+    const headBranchName = head.split('ref: ')[1].split('/')[2].trim()
+    console.log('head branch name from util: ', headBranchName)
+    return headBranchName
+  }
+
+  if (!cache.pathToHead) {
+    const localRepo = await input({
+      message: `Enter the path to your local travelpass.com repo starting after your home directory:`,
+    })
+    try {
+      const pathToHead = path.join(homedir(), localRepo, '/.git/HEAD')
+      const headBranchName = fetchHeadBranchName(pathToHead)
+      cache.pathToHead = pathToHead
+      cache.headBranchName = headBranchName
+      return headBranchName
+    } catch (err) {
+      console.error('Error retrieving head branch name:', err)
+    }
+  } else {
+    const headBranchName = fetchHeadBranchName(cache.pathToHead)
+    cache.headBranchName = headBranchName
+    return headBranchName
+  }
 }
 
 export const fetchPRs = async () => {
@@ -85,7 +158,7 @@ export const resolveActionChoice = async (
       await resolveActionChoice(newAction, prChoice)
     }
     case 'slack': {
-      const cachedPr = cache.prs?.find(({ number }) => number === prChoice)
+      const cachedPr = cache.prs[prChoice]
       if (!cachedPr) {
         console.error('No cached PR found for the selected choice.')
         return
@@ -121,7 +194,7 @@ export const resolveActionChoice = async (
       await resolveActionChoice(newAction, prChoice)
     }
     case 'url': {
-      const prUrl = cache.prs?.find(({ number }) => number === prChoice)?.url
+      const prUrl = cache.prs[prChoice]?.url
 
       if (prUrl) {
         // Determine the platform and execute the appropriate command

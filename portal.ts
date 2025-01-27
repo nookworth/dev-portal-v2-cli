@@ -1,6 +1,6 @@
-import { mainMenu, prActions } from './menus'
+import { createPr, mainMenu, prActions } from './menus'
 import { fetchPRs, resolveActionChoice } from './utils'
-import { cache, PR } from './cache'
+import { cache } from './cache'
 import process from 'node:process'
 import { styleText } from 'util'
 import { goodbyeMessages } from './constants'
@@ -12,28 +12,23 @@ console.log(onOpenMessage + '\n')
 
 // Fetch PRs and update cache on startup
 try {
-  const prs = await fetchPRs()
-  const prData = prs.map(({ number, status, title, url }: PR) => ({
-    number,
-    status,
-    title,
-    url,
-  }))
-  if (!cache.prs.length) {
-    cache.prs = prData
-  } else {
-    // if an existing PR has changed, update its properties
-    cache.prs = prData.map(({ number, status, title, url }) => {
-      const existingPr = cache.prs.find(p => p.number === number)
-      if (existingPr) {
-        return {
-          ...existingPr,
-          ...{ status, title, url },
-        }
+  const prsFromGitHub = await fetchPRs()
+  const cachedPRs = cache.prs
+  const tempCache = {}
+  prsFromGitHub.forEach(pr => {
+    const { number, ref, status, title, url } = pr
+    tempCache[number] = { number, ref, status, title, url }
+  })
+  for (const pr in cachedPRs) {
+    const latestPRData = tempCache[pr]
+    if (latestPRData) {
+      tempCache[pr] = {
+        ...cachedPRs[pr],
+        ...latestPRData,
       }
-      return { number, status, title, url }
-    })
+    }
   }
+  cache.prs = tempCache
 } catch (err) {
   console.error('Error fetching PRs:', err)
 }
@@ -45,7 +40,9 @@ if (prChoice === 0) {
     goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)]
   )
   process.exit(0)
+} else if (prChoice === 1000) {
+  await createPr()
+} else {
+  const actionChoice = await prActions(prChoice)
+  await resolveActionChoice(actionChoice, prChoice)
 }
-
-const actionChoice = await prActions(prChoice)
-await resolveActionChoice(actionChoice, prChoice)

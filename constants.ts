@@ -15,7 +15,6 @@ const goodbyeMessages = [
   'So long and thanks for all the fish 👋',
   'Adios 👋',
 ]
-const newPRMessage = 'New pull request from HEAD'
 
 const theme = {
   icon: {
@@ -24,14 +23,17 @@ const theme = {
   style: {
     highlight: (text: string) => {
       const isExit = text.includes('Exit')
-      const isNewPR = text.includes(newPRMessage)
+      const isNewPR = text.includes('New pull request')
+      if (isNewPR) {
+        const branchName = text.split('New pull request from ')[1]
+        const branchNameSubstr = styleText('greenBright', branchName)
+        return styleText('green', text.replace(branchName, branchNameSubstr))
+      }
       const numberSubstring = text.match(/\s\(#\d+\)/)?.[0] ?? ''
       const rest = text.slice(0, text.length - numberSubstring.length)
       return isExit
-        ? styleText('redBright', text)
-        : isNewPR
-        ? styleText('greenBright', text)
-        : styleText('yellowBright', rest) + styleText('gray', numberSubstring)
+        ? styleText('red', text)
+        : styleText('yellow', rest) + styleText('gray', numberSubstring)
     },
   },
 }
@@ -50,7 +52,6 @@ export type { SlackActions }
 export {
   devMode,
   goodbyeMessages,
-  newPRMessage,
   SlackActions as SlackActionsEnum,
   theme,
   urlConstants,
