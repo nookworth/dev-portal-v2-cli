@@ -74,7 +74,7 @@ export const setHeadBranchName = async (cache: PortalCache) => {
 
   if (!cache.pathToHead) {
     const localRepo = await input({
-      message: `Enter the path to your local travelpass.com repo starting after your home directory:`,
+      message: `Enter the path to your local git repository starting after your home directory:`,
     })
     try {
       const pathToHead = path.join(homedir(), localRepo, '/.git/HEAD')
