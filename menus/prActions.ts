@@ -39,6 +39,14 @@ export const prActions = async (prChoice: number) => {
     message: 'Select an action:',
     choices: [
       {
+        name: 'Open GitHub',
+        value: 'url',
+      },
+      {
+        name: 'Generate Linear Report',
+        value: 'linear',
+      },
+      {
         name: slackOption,
         value: 'slack',
       },
@@ -46,14 +54,6 @@ export const prActions = async (prChoice: number) => {
         name: 'Merge',
         value: 'merge',
         disabled: !mergeable,
-      },
-      {
-        name: 'Open GitHub',
-        value: 'url',
-      },
-      {
-        name: 'Generate Linear Report',
-        value: 'linear',
       },
       {
         name: '⬅️  Go Back',
