@@ -9,7 +9,7 @@ const mainMenu = async () => {
   const cachedPrsArray = Object.entries(cachedPRs)
   const headBranchName = await setHeadBranchName(cache)
   const headBranchHasExistingPR = cachedPrsArray.some(
-    ([_, value]) => value && value.headRef?.trim() === headBranchName?.trim()
+    ([_, value]) => value && value.ref?.trim() === headBranchName?.trim()
   )
   const newPRMessage = `New pull request from ${cache.headBranchName}`
   const mainMenuTail =
@@ -37,7 +37,7 @@ const mainMenu = async () => {
   const choices = (prOptions ?? []).concat(mainMenuTail)
 
   const prChoice: number = await select({
-    message: noPRs ? 'No PRs found 🥲' : 'Select a PR for more actions:',
+    message: noPRs ? 'Select an action:' : 'Select a PR for more actions:',
     choices,
     theme,
   })

@@ -7,9 +7,16 @@ export const prActions = async (prChoice: number) => {
   const cachedPr = cache.prs[prChoice]
   if (!cachedPr) {
     const fetchedPR = await fetchSinglePR(prChoice)
-    const { head: { ref }, mergeable, number, status, title, url } = fetchedPR
+    const {
+      head: { ref },
+      mergeable,
+      number,
+      status,
+      title,
+      url,
+    } = fetchedPR
     cache.prs[number] = {
-      headRef: ref,
+      ref,
       mergeable,
       number,
       postedToSlack: false,
@@ -43,6 +50,10 @@ export const prActions = async (prChoice: number) => {
       {
         name: 'Open GitHub',
         value: 'url',
+      },
+      {
+        name: 'Generate Linear Report',
+        value: 'linear',
       },
       {
         name: '⬅️  Go Back',

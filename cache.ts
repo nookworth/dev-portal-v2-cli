@@ -6,7 +6,7 @@ type PR = {
   mergeable?: boolean
   number: number
   postedToSlack?: boolean
-  headRef: string
+  ref: string
   reviewTs?: string
   status: string
   title: string

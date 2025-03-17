@@ -36,7 +36,7 @@ export const createPullRequest = async ({
         status: prStatus,
       } = data ?? {}
       cache.prs[number] = {
-        headRef: ref,
+        ref,
         number,
         title: prTitle,
         url,
@@ -68,7 +68,6 @@ export const setHeadBranchName = async (cache: PortalCache) => {
   const fetchHeadBranchName = (pathToHead: string) => {
     const head = readFileSync(pathToHead, 'utf-8')
     const headBranchName = head.split('ref: ')[1].split('/')[2].trim()
-    console.log('head branch name from util: ', headBranchName)
     return headBranchName
   }
 
@@ -90,6 +89,15 @@ export const setHeadBranchName = async (cache: PortalCache) => {
     cache.headBranchName = headBranchName
     return headBranchName
   }
+}
+
+export const fetchLinearReport = async (body: {
+  branchName: string
+  prNumber: string
+}) => {
+  const response = await axios.post(`${domain}/linear-report`, body)
+  const { status, data } = response ?? {}
+  return { status, data }
 }
 
 export const fetchPRs = async () => {
@@ -154,6 +162,21 @@ export const resolveActionChoice = async (
         process.exit(0)
       }
 
+      const newAction = await prActions(prChoice)
+      await resolveActionChoice(newAction, prChoice)
+    }
+    case 'linear': {
+      const cachedPr = cache.prs[prChoice]
+      if (!cachedPr) {
+        console.error('No cached PR found for the selected choice.')
+        return
+      }
+      const { number, ref } = cachedPr
+      const linearReport = await fetchLinearReport({
+        branchName: ref ?? '',
+        prNumber: number.toString(),
+      })
+      console.log({ linearReport })
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }

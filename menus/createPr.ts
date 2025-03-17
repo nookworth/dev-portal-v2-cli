@@ -6,7 +6,7 @@ import { mainMenu } from '.'
 export const createPr = async () => {
   if (!cache.headBranchName) {
     console.error('No head branch name found')
-    return mainMenu()
+    return await mainMenu()
   }
   const title = await input({ message: 'Enter the title of the PR:' })
   const body = await input({ message: 'Enter the body of the PR:' })
@@ -18,9 +18,9 @@ export const createPr = async () => {
     })) ?? {}
   if (status === 201) {
     console.log('PR created successfully')
-    return mainMenu()
+    return await mainMenu()
   } else {
     console.error('Error creating PR')
-    return mainMenu()
+    return await mainMenu()
   }
 }
