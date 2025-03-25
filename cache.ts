@@ -2,13 +2,14 @@ import { readFileSync, existsSync } from 'fs'
 import path from 'node:path'
 import { homedir } from 'os'
 
+/**@todo import real types */
 type PR = {
-  mergeable?: boolean
+  mergeable?: boolean | null | undefined
   number: number
   postedToSlack?: boolean
   ref: string
   reviewTs?: string
-  status: string
+  status: 'open' | 'closed'
   title: string
   url: string
 }

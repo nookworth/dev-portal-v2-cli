@@ -1,23 +1,23 @@
 import { createPr, mainMenu, prActions } from './menus'
-import { fetchPRs, resolveActionChoice } from './utils'
+import { getPRs, resolveActionChoice } from './utils'
 import { cache } from './cache'
 import process from 'node:process'
 import { styleText } from 'util'
 import { goodbyeMessages } from './constants'
 import './events'
-import './webSocket'
+// import './webSocket'
 
 const onOpenMessage = styleText('gray', 'Fetching your PRs...')
 console.log(onOpenMessage + '\n')
 
 // Fetch PRs and update cache on startup
 try {
-  const prsFromGitHub = await fetchPRs()
+  const prsFromGitHub = await getPRs()
   const cachedPRs = cache.prs
   const tempCache = {}
-  prsFromGitHub.forEach(pr => {
-    const { number, ref, status, title, url } = pr
-    tempCache[number] = { number, ref, status, title, url }
+  prsFromGitHub?.forEach(pr => {
+    const { number, ref, title, url } = pr
+    tempCache[number] = { number, ref, title, url }
   })
   for (const pr in cachedPRs) {
     const latestPRData = tempCache[pr]

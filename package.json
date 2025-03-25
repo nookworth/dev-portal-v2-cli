@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev": "tsx ./portal.ts true",
-    "prod": "tsx ./portal.ts false"
+    "dev": "tsx ./portal.ts true travelpassgroup travelpass.com nookoid",
+    "prod": "tsx ./portal.ts false travelpassgroup travelpass.com nookoid"
   },
   "type": "module",
   "dependencies": {
@@ -10,7 +10,8 @@
     "@langchain/langgraph": "^0.2.57",
     "@langchain/openai": "^0.4.9",
     "@linear/sdk": "^38.0.0",
-    "axios": "^1.7.9",
+    "@slack/web-api": "^7.9.0",
+    "dotenv": "^16.4.7",
     "octokit": "^4.1.2",
     "ws": "^8.18.0",
     "zod": "^3.24.2"
