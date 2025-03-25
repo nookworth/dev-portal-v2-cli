@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { styleText } from 'util'
 
 enum SlackActions {
@@ -5,7 +6,6 @@ enum SlackActions {
   delete = 'delete',
 }
 
-const devMode = process.argv[2]
 const goodbyeMessages = [
   'Goodbye 👋',
   'See you later 👋',
@@ -38,9 +38,22 @@ const theme = {
   },
 }
 
+// Command line arguments
+let test = process.argv[2]
+let owner = process.argv[3]
+let repo = process.argv[4]
+let user = process.argv[5]
+
+// Constants
+const baseRepo = owner === 'travelpassgroup' ? 'master' : 'main'
+const baseUrl = 'https://api.github.com'
+const devFrontendReviewsChannelId = 'C039QHRA6TA'
+const deploymentBotTestChannelId = 'C089KFXCWJC'
+const channelId =
+  test === 'true' ? deploymentBotTestChannelId : devFrontendReviewsChannelId
 const urlConstants = {
   domain:
-    devMode === 'true'
+    test === 'true'
       ? 'http://localhost:8080'
       : 'https://tpg-dev-portal-server.fly.dev',
   owner: 'nookworth',
@@ -48,11 +61,35 @@ const urlConstants = {
   review: 'review-message',
 }
 
+// Environment variables
+const langchainApiKey = process.env.LANGCHAIN_API_KEY
+const openAIKey = process.env.OPENAI_API_KEY
+const nookworthPat = process.env.NOOKWORTH_PAT
+const tpgPat = process.env.PAT
+const linearApiKey = process.env.LINEAR_API_KEY
+const auth =
+  test === 'false'
+    ? tpgPat
+    : owner === 'travelpassgroup'
+    ? tpgPat
+    : nookworthPat
+
 export type { SlackActions }
 export {
-  devMode,
+  auth,
+  baseRepo,
+  baseUrl,
+  channelId,
   goodbyeMessages,
+  langchainApiKey,
+  linearApiKey,
+  openAIKey,
+  owner,
+  repo,
   SlackActions as SlackActionsEnum,
   theme,
+  test,
+  tpgPat,
   urlConstants,
+  user,
 }

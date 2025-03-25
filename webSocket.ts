@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws'
-import { devMode } from './constants'
+import { test } from './constants'
 
 const url =
-  devMode === 'true'
+  test === 'true'
     ? 'ws://localhost:8080'
     : 'wss://tpg-dev-portal-server.fly.dev'
 const ws = new WebSocket(url)
