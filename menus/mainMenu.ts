@@ -13,7 +13,9 @@ const mainMenu = async () => {
   )
   const newPRMessage = `New pull request from ${cache.headBranchName}`
   const mainMenuTail =
-    headBranchHasExistingPR || headBranchName === 'master'
+    headBranchHasExistingPR ||
+    headBranchName === 'master' ||
+    headBranchName === 'main'
       ? [{ name: 'Exit', value: 0 }]
       : [
           { name: newPRMessage, value: 1000 },

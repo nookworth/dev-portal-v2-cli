@@ -1,26 +1,34 @@
 import { cache } from '../cache'
 import { input } from '@inquirer/prompts'
 import { createPullRequest } from '../utils'
-import { mainMenu } from '.'
+import { mainMenu, prActions } from '.'
+
+const handleMenuFlow = async () => {
+  const prChoice = await mainMenu()
+  if (prChoice === 0) {
+    console.log('Goodbye 👋')
+    process.exit(0)
+  }
+  return await prActions(prChoice)
+}
 
 export const createPr = async () => {
   if (!cache.headBranchName) {
     console.error('No head branch name found')
-    return await mainMenu()
+    return handleMenuFlow()
   }
+
   const title = await input({ message: 'Enter the title of the PR:' })
   const body = await input({ message: 'Enter the body of the PR:' })
-  const { status } =
-    (await createPullRequest({
-      head: cache.headBranchName,
-      title,
-      body,
-    })) ?? {}
-  if (status === 201) {
-    console.log('PR created successfully')
-    return await mainMenu()
-  } else {
-    console.error('Error creating PR')
-    return await mainMenu()
-  }
+
+  const response = await createPullRequest({
+    head: cache.headBranchName,
+    title,
+    body,
+  })
+
+  console.log(
+    response?.status === 201 ? 'PR created successfully' : 'Error creating PR'
+  )
+  return handleMenuFlow()
 }

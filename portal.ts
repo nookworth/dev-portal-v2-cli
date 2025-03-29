@@ -15,10 +15,12 @@ try {
   const prsFromGitHub = await getPRs()
   const cachedPRs = cache.prs
   const tempCache = {}
+
   prsFromGitHub?.forEach(pr => {
     const { number, ref, title, url } = pr
     tempCache[number] = { number, ref, title, url }
   })
+
   for (const pr in cachedPRs) {
     const latestPRData = tempCache[pr]
     if (latestPRData) {
@@ -28,6 +30,7 @@ try {
       }
     }
   }
+
   cache.prs = tempCache
 } catch (err) {
   console.error('Error fetching PRs:', err)
