@@ -1,11 +1,12 @@
 import {
   baseRepo as base,
   channelId as channel,
+  goodbyeMessages,
   owner,
   repo,
   user,
 } from './constants'
-import { mainMenu, prActions } from './menus'
+import { createPr, mainMenu, prActions } from './menus'
 import { exec } from 'child_process'
 import { cache, PortalCache } from './cache'
 import { writeFileSync } from 'fs'
@@ -365,5 +366,21 @@ export const saveCache = () => {
     )
   } catch (error) {
     console.error('ERROR WRITING CACHE\n', error)
+  }
+}
+
+export const handleMenuFlow = async () => {
+  const prChoice = await mainMenu()
+
+  if (prChoice === 0) {
+    console.log(
+      goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)]
+    )
+    process.exit(0)
+  } else if (prChoice === 1000) {
+    await createPr()
+  } else {
+    const actionChoice = await prActions(prChoice)
+    await resolveActionChoice(actionChoice, prChoice)
   }
 }

@@ -1,9 +1,6 @@
-import { createPr, mainMenu, prActions } from './menus'
-import { getPRs, resolveActionChoice } from './utils'
+import { getPRs, handleMenuFlow } from './utils'
 import { cache } from './cache'
-import process from 'node:process'
 import { styleText } from 'util'
-import { goodbyeMessages } from './constants'
 import './events'
 // import './webSocket'
 
@@ -36,16 +33,4 @@ try {
   console.error('Error fetching PRs:', err)
 }
 
-const prChoice = await mainMenu()
-
-if (prChoice === 0) {
-  console.log(
-    goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)]
-  )
-  process.exit(0)
-} else if (prChoice === 1000) {
-  await createPr()
-} else {
-  const actionChoice = await prActions(prChoice)
-  await resolveActionChoice(actionChoice, prChoice)
-}
+await handleMenuFlow()
