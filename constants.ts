@@ -74,6 +74,10 @@ const auth =
     ? tpgPat
     : nookworthPat
 
+owner ||= 'travelpassgroup'
+repo ||= 'travelpass.com'
+user ||= 'nookoid'
+
 export type { SlackActions }
 export {
   auth,

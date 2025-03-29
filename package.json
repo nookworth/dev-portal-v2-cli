@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "dev": "tsx ./portal.ts true travelpassgroup travelpass.com nookoid",
-    "prod": "tsx ./portal.ts false travelpassgroup travelpass.com nookoid"
+    "dev": "tsx ./portal.ts true travelpassgroup travelpass.com",
+    "prod": "tsx ./portal.ts false travelpassgroup travelpass.com",
+    "test": "tsx portal.ts true nookworth tpg-dev-portal"
   },
   "type": "module",
   "dependencies": {
