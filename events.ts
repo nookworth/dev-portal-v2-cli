@@ -1,4 +1,4 @@
-import { saveCache } from './utils'
+import { saveCache } from './utils/file'
 
 // Save cache on exit
 process.on('exit', saveCache)

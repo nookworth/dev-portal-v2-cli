@@ -1,7 +1,8 @@
-import { getPRs, handleMenuFlow } from './utils'
+import { handleMenuFlow } from './utils/menu'
 import { cache } from './cache'
 import { styleText } from 'util'
 import './events'
+import { getPRs } from './utils/api'
 // import './webSocket'
 
 const onOpenMessage = styleText('gray', 'Fetching your PRs...')

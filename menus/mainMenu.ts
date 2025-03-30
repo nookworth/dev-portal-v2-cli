@@ -2,7 +2,7 @@ import { select } from '@inquirer/prompts'
 import { theme } from '../constants'
 import { cache } from '../cache'
 import { styleText } from 'util'
-import { setHeadBranchName } from '../utils'
+import { setHeadBranchName } from '../utils/file'
 
 const mainMenu = async () => {
   const { prs: cachedPRs } = cache

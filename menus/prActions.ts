@@ -1,5 +1,5 @@
 import { select } from '@inquirer/prompts'
-import { fetchSinglePR } from '../utils'
+import { fetchSinglePR } from '../utils/api'
 import { theme } from '../constants'
 import { cache } from '../cache'
 

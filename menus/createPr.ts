@@ -1,6 +1,7 @@
 import { cache } from '../cache'
 import { input } from '@inquirer/prompts'
-import { handleMenuFlow, createPullRequest } from '../utils'
+import { createPullRequest } from '../utils/api'
+import { handleMenuFlow } from '../utils/menu'
 
 export const createPr = async () => {
   if (!cache.headBranchName) {
