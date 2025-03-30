@@ -4,6 +4,7 @@ import { deleteSlackPost, fetchLinearReport, postToSlack } from './api'
 import { exec } from 'child_process'
 import { mergePullRequest } from './api'
 import { goodbyeMessages } from '../constants'
+import { ActionChoice } from '../types'
 
 export const handleMenuFlow = async () => {
   const prChoice = await mainMenu()
@@ -22,7 +23,7 @@ export const handleMenuFlow = async () => {
 }
 
 export const resolveActionChoice = async (
-  actionChoice: string,
+  actionChoice: ActionChoice,
   prChoice: number
 ) => {
   switch (actionChoice) {
@@ -37,6 +38,7 @@ export const resolveActionChoice = async (
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
+
     case 'linear': {
       const cachedPr = cache.prs[prChoice]
       if (!cachedPr) {
@@ -53,6 +55,7 @@ export const resolveActionChoice = async (
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
+
     case 'slack': {
       const cachedPr = cache.prs[prChoice]
       if (!cachedPr) {
@@ -83,6 +86,7 @@ export const resolveActionChoice = async (
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
+
     case 'url': {
       const prUrl = cache.prs[prChoice]?.url
 
@@ -106,6 +110,7 @@ export const resolveActionChoice = async (
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)
     }
+
     case 'merge': {
       const cachedPr = cache.prs[prChoice]
       if (!cachedPr) {

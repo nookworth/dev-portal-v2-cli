@@ -10,7 +10,9 @@ import { cache } from '../cache'
 import { formatSlackMessage, parseBranchName } from './string'
 import { getLinearReport } from '../linear-agent/agent'
 
-// GitHub
+/**
+ * GITHUB
+ */
 const checkCommitStatus = async (prNumber: number): Promise<boolean> => {
   try {
     const pr = await octokit.rest.pulls.get({
@@ -214,7 +216,9 @@ const mergePullRequest = async (prNumber: number) => {
   }
 }
 
-// Linear
+/**
+ * LINEAR
+ */
 export const fetchLinearReport = async ({
   branchName,
   prNumber,
@@ -244,7 +248,9 @@ export const fetchLinearReport = async ({
   }
 }
 
-// Slack
+/**
+ * SLACK
+ */
 const deleteSlackPost = async (ts: string) => {
   try {
     const response = await slackClient.chat.delete({
