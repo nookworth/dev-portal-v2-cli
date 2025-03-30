@@ -2,8 +2,9 @@ import { select } from '@inquirer/prompts'
 import { fetchSinglePR } from '../utils/api'
 import { theme } from '../constants'
 import { cache } from '../cache'
+import { ActionChoice } from '../types'
 
-export const prActions = async (prChoice: number) => {
+export const prActions = async (prChoice: number): Promise<ActionChoice> => {
   const cachedPr = cache.prs[prChoice]
   if (!cachedPr) {
     const fetchedPR = await fetchSinglePR(prChoice)
@@ -59,5 +60,5 @@ export const prActions = async (prChoice: number) => {
     theme,
   })
 
-  return actionChoice
+  return actionChoice as ActionChoice
 }
