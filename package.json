@@ -13,6 +13,7 @@
     "@linear/sdk": "^38.0.0",
     "@slack/web-api": "^7.9.0",
     "dotenv": "^16.4.7",
+    "eventsource": "^3.0.6",
     "octokit": "^4.1.2",
     "ws": "^8.18.0",
     "zod": "^3.24.2"
