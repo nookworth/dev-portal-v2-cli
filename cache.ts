@@ -2,14 +2,24 @@ import { readFileSync, existsSync } from 'fs'
 import path from 'node:path'
 import { homedir } from 'os'
 
-/**@todo import real types */
 type PR = {
+  head: {
+    ref: string
+    sha: string
+  }
   mergeable?: boolean | null | undefined
   number: number
   postedToSlack?: boolean
-  ref: string
+  reviews?: Array<{
+    body: string
+    state: string
+    user: string
+  }>
   reviewTs?: string
-  status: 'open' | 'closed'
+  /**@desc the state of the PR */
+  state: 'open' | 'closed'
+  /**@desc the status of the head commit; needs to be 'success' for the PR to be mergeable */
+  status: string
   title: string
   url: string
 }

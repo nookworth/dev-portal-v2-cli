@@ -13,54 +13,6 @@ import { getLinearReport } from '../linear-agent/agent'
 /**
  * GITHUB
  */
-const checkCommitStatus = async (prNumber: number): Promise<boolean> => {
-  try {
-    const pr = await octokit.rest.pulls.get({
-      owner,
-      repo,
-      pull_number: prNumber,
-    })
-
-    const mergeable = pr.data.mergeable
-    const sha = pr.data.head.sha
-
-    if (!mergeable) {
-      return false
-    }
-
-    const response = await octokit.rest.repos.getCombinedStatusForRef({
-      owner,
-      repo,
-      ref: sha,
-    })
-
-    /**@todo look into why the state is unexpectedly pending */
-    const state = response.data.state
-
-    console.log({ mergeable, sha, state })
-
-    return state === 'success'
-  } catch (error) {
-    console.error('Error checking PR status:', error)
-    return false
-  }
-}
-
-const checkPRReviewStatus = async (prNumber: number): Promise<boolean> => {
-  try {
-    const response = await octokit.rest.pulls.listReviews({
-      owner,
-      repo,
-      pull_number: prNumber,
-    })
-
-    return response.data.some(review => review.state === 'APPROVED')
-  } catch (error) {
-    console.error('Error checking PR review status:', error)
-    return false
-  }
-}
-
 const createPullRequest = async ({
   body,
   head,
@@ -83,18 +35,19 @@ const createPullRequest = async ({
     const { status, data } = response
     if (status === 201) {
       const {
-        head: { ref },
+        head: { ref, sha },
         number,
         title: prTitle,
         html_url: url,
-        state: prStatus,
+        state,
       } = data
       cache.prs[number] = {
-        ref,
+        head: { ref, sha },
         number,
+        state,
+        status: 'pending',
         title: prTitle,
         url,
-        status: prStatus,
       }
     }
     return { status, data }
@@ -103,14 +56,40 @@ const createPullRequest = async ({
   }
 }
 
-const fetchSinglePR = async (prNumber: number) => {
+const fetchIndividualPR = async (prNumber: number) => {
   try {
-    const response = await octokit.rest.pulls.get({
+    const pullRequest = await octokit.rest.pulls.get({
       owner,
       repo,
       pull_number: prNumber,
     })
-    return response.data
+
+    if (!pullRequest.data) {
+      throw new Error(`Failed to fetch PR #${prNumber}`)
+    }
+
+    const reviews = await octokit.rest.pulls.listReviews({
+      owner,
+      repo,
+      pull_number: prNumber,
+    })
+    const reviewData = reviews?.data?.map(({ body, state, user }) => ({
+      body: body,
+      state: state,
+      user: user?.login ?? '',
+    }))
+
+    const status = await octokit.rest.repos.getCombinedStatusForRef({
+      owner,
+      repo,
+      ref: pullRequest.data.head.sha,
+    })
+
+    return {
+      ...pullRequest.data,
+      reviews: reviewData,
+      status: status?.data?.state,
+    }
   } catch (error) {
     if (error.response) {
       console.error(`HTTP Error: ${error.response.status}`)
@@ -180,20 +159,6 @@ const getPRs = async () => {
 
 const mergePullRequest = async (prNumber: number) => {
   try {
-    const hasApproval = await checkPRReviewStatus(prNumber)
-    if (!hasApproval) {
-      console.error('Cannot merge: PR does not have an approving review')
-      return false
-    }
-
-    const checksPassed = await checkCommitStatus(prNumber)
-    if (!checksPassed) {
-      console.error(
-        'Cannot merge: Not all checks have passed or there are merge conflicts'
-      )
-      return false
-    }
-
     const response = await octokit.rest.pulls.merge({
       owner,
       repo,
@@ -202,9 +167,10 @@ const mergePullRequest = async (prNumber: number) => {
     })
 
     if (response.status === 200) {
-      console.log('PR merged successfully')
+      console.log('PR merged 🎉')
       return true
     }
+
     return false
   } catch (error) {
     console.error('Error merging PR:', error)
@@ -297,10 +263,9 @@ const postToSlack = async (body: { title: string; url: string }) => {
 
 export {
   createPullRequest,
-  fetchSinglePR,
+  fetchIndividualPR,
   postToSlack,
   getPRs,
   deleteSlackPost,
-  checkPRReviewStatus,
   mergePullRequest,
 }

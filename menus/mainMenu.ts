@@ -9,7 +9,7 @@ const mainMenu = async () => {
   const cachedPrsArray = Object.entries(cachedPRs)
   const headBranchName = await setHeadBranchName(cache)
   const headBranchHasExistingPR = cachedPrsArray.some(
-    ([_, value]) => value && value.ref?.trim() === headBranchName?.trim()
+    ([_, value]) => value && value?.head?.ref?.trim() === headBranchName?.trim()
   )
   const newPRMessage = `New pull request from ${cache.headBranchName}`
   const mainMenuTail =

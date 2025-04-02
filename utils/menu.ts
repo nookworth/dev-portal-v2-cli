@@ -45,10 +45,10 @@ export const resolveActionChoice = async (
         console.error('No cached PR found for the selected choice.')
         return
       }
-      const { number, ref } = cachedPr
+      const { head, number } = cachedPr
 
       await fetchLinearReport({
-        branchName: ref ?? '',
+        branchName: head.ref ?? '',
         prNumber: number.toString(),
       })
 

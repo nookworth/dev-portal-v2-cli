@@ -1,36 +1,46 @@
 import { select } from '@inquirer/prompts'
-import { fetchSinglePR } from '../utils/api'
+import { fetchIndividualPR } from '../utils/api'
 import { theme } from '../constants'
 import { cache } from '../cache'
 import { ActionChoice } from '../types'
 
+// strategy: fetch the individual PR once upon first selecting it from the menu, then rely on webhooks to update the cache
 export const prActions = async (prChoice: number): Promise<ActionChoice> => {
+  console.log({ cache: JSON.stringify(cache, null, 2) })
   const cachedPr = cache.prs[prChoice]
-  if (!cachedPr) {
-    const fetchedPR = await fetchSinglePR(prChoice)
+
+  if (
+    !cachedPr ||
+    cachedPr.mergeable === null ||
+    cachedPr.mergeable === undefined
+  ) {
+    const fetchedPR = await fetchIndividualPR(prChoice)
+
     if (fetchedPR) {
-      const { head, mergeable, number, state, title, url } = fetchedPR
-      const { ref } = head
+      const { head, mergeable, number, reviews, state, status, title, url } =
+        fetchedPR
+      const { ref, sha } = head
+
       cache.prs[number] = {
-        ref,
+        head: { ref, sha },
+        reviews,
         mergeable,
         number,
         postedToSlack: false,
-        status: state,
+        state,
+        status,
         title,
         url,
       }
     }
-    // means the PR was fetched in the main menu, which uses GH's "List Pull Requests" API, which does not return mergeable status
-  } else if (!cachedPr.mergeable) {
-    const fetchedPR = await fetchSinglePR(prChoice)
-    const { mergeable } = fetchedPR ?? {}
-    cachedPr.mergeable = mergeable
-    cachedPr.postedToSlack = false
   }
 
-  const { mergeable, postedToSlack } = cachedPr ?? {}
+  const { mergeable, postedToSlack, reviews, status } = cachedPr ?? {}
   const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
+  const isMergeable =
+    status === 'success' &&
+    mergeable &&
+    reviews?.some(review => review.state === 'approved')
 
   const actionChoice = await select({
     message: 'Select an action:',
@@ -50,7 +60,7 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
       {
         name: 'Merge',
         value: 'merge',
-        disabled: !mergeable,
+        disabled: !isMergeable,
       },
       {
         name: '⬅️  Go Back',
