@@ -6,7 +6,6 @@ import { ActionChoice } from '../types'
 
 // strategy: fetch the individual PR once upon first selecting it from the menu, then rely on webhooks to update the cache
 export const prActions = async (prChoice: number): Promise<ActionChoice> => {
-  console.log({ cache: JSON.stringify(cache, null, 2) })
   const cachedPr = cache.prs[prChoice]
 
   if (
@@ -17,14 +16,24 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     const fetchedPR = await fetchIndividualPR(prChoice)
 
     if (fetchedPR) {
-      const { head, mergeable, number, reviews, state, status, title, url } =
-        fetchedPR
+      const {
+        head,
+        html_url: url,
+        mergeable,
+        mergeable_state: mergeableState,
+        number,
+        reviews,
+        state,
+        status,
+        title,
+      } = fetchedPR
       const { ref, sha } = head
 
       cache.prs[number] = {
         head: { ref, sha },
         reviews,
         mergeable,
+        mergeableState,
         number,
         postedToSlack: false,
         state,
@@ -35,12 +44,14 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     }
   }
 
-  const { mergeable, postedToSlack, reviews, status } = cachedPr ?? {}
+  const { mergeable, mergeableState, postedToSlack, reviews, status } =
+    cachedPr ?? {}
   const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
   const isMergeable =
     status === 'success' &&
     mergeable &&
-    reviews?.some(review => review.state === 'approved')
+    mergeableState === 'clean' &&
+    reviews?.some(review => review.state === 'APPROVED')
 
   const actionChoice = await select({
     message: 'Select an action:',

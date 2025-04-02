@@ -7,7 +7,9 @@ type PR = {
     ref: string
     sha: string
   }
-  mergeable?: boolean | null | undefined
+  mergeable: boolean | null | undefined
+  /**@desc see https://github.com/octokit/octokit.net/issues/1763 */
+  mergeableState: string | null | undefined
   number: number
   postedToSlack?: boolean
   reviews?: Array<{

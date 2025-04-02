@@ -43,6 +43,8 @@ const createPullRequest = async ({
       } = data
       cache.prs[number] = {
         head: { ref, sha },
+        mergeable: null,
+        mergeableState: null,
         number,
         state,
         status: 'pending',
