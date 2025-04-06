@@ -52,6 +52,24 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     mergeable &&
     mergeableState === 'clean' &&
     reviews?.some(review => review.state === 'APPROVED')
+  const reasons = () => {
+    const reasons: string[] = []
+
+    if (status !== 'success') {
+      reasons.push('    • not all checks successful')
+    }
+    if (!mergeable) {
+      reasons.push('    • has conflicts')
+    }
+    if (mergeableState !== 'clean') {
+      reasons.push('    • behind master')
+    }
+    if (!reviews?.some(review => review.state === 'APPROVED')) {
+      reasons.push('    • needs approval')
+    }
+    return 'Not mergeable: \n' + reasons.join('\n')
+  }
+  const mergeDisplayOption = isMergeable ? 'Merge' : reasons()
 
   const actionChoice = await select({
     message: 'Select an action:',
@@ -69,7 +87,7 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
         value: 'slack',
       },
       {
-        name: 'Merge',
+        name: mergeDisplayOption,
         value: 'merge',
         disabled: !isMergeable,
       },

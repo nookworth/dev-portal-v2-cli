@@ -1,9 +1,9 @@
 import { handleMenuFlow } from './utils/menu'
 import { cache } from './cache'
 import { styleText } from 'util'
-import './events'
 import { getPRs } from './utils/api'
-// import './webSocket'
+import './serverSentEvents'
+import './process'
 
 const onOpenMessage = styleText('gray', 'Fetching your PRs...')
 console.log(onOpenMessage + '\n')

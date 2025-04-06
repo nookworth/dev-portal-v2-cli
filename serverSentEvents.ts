@@ -1,10 +1,9 @@
 import { EventSource } from 'eventsource'
-import { config } from 'dotenv'
-import { user } from './constants'
+import { test, user } from './constants'
 
-config()
-
-const serverSentEventsURL = `http://tpg-dev-portal-server.fly.dev/events/${user}`
+const serverSentEventsURL = test
+  ? `http://localhost:8080/events/${user}`
+  : `http://tpg-dev-portal-server.fly.dev/events/${user}`
 
 const eventSource = new EventSource(serverSentEventsURL)
 
@@ -30,5 +29,3 @@ process.on('SIGINT', () => {
   eventSource.close()
   process.exit()
 })
-
-export { eventSource }
