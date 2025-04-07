@@ -3,8 +3,10 @@ import { theme } from '../constants'
 import { cache } from '../cache'
 import { styleText } from 'util'
 import { setHeadBranchName } from '../utils/file'
+import { getContext } from '../utils/menu'
 
-const mainMenu = async () => {
+export const mainMenu = async () => {
+  const context = getContext()
   const { prs: cachedPRs } = cache
   const cachedPrsArray = Object.entries(cachedPRs)
   const headBranchName = await setHeadBranchName(cache)
@@ -37,14 +39,24 @@ const mainMenu = async () => {
 
   const noPRs = prOptions?.length === 0
   const choices = (prOptions ?? []).concat(mainMenuTail)
+  let prChoice: number = 0
 
-  const prChoice: number = await select({
-    message: noPRs ? 'Select an action:' : 'Select a PR for more actions:',
-    choices,
-    theme,
-  })
+  try {
+    const choice = await select(
+      {
+        message: noPRs ? 'Select an action:' : 'Select a PR for more actions:',
+        choices,
+        theme,
+      },
+      context
+    )
+    prChoice = choice
+  } catch (error) {
+    if (error.message.includes('Prompt was aborted')) {
+      process.exit(0)
+    }
+    console.error(error)
+  }
 
   return prChoice
 }
-
-export { mainMenu }

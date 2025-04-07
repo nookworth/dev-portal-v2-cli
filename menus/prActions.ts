@@ -3,10 +3,12 @@ import { fetchIndividualPR } from '../utils/api'
 import { theme } from '../constants'
 import { cache } from '../cache'
 import { ActionChoice } from '../types'
+import { getContext } from '../utils/menu'
 
 // strategy: fetch the individual PR once upon first selecting it from the menu, then rely on webhooks to update the cache
-export const prActions = async (prChoice: number): Promise<ActionChoice> => {
+export const prActions = async (prChoice: number) => {
   const cachedPr = cache.prs[prChoice]
+  const context = getContext()
 
   if (
     !cachedPr ||
@@ -44,6 +46,7 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     }
   }
 
+  let actionChoice: ActionChoice = 'back'
   const { mergeable, mergeableState, postedToSlack, reviews, status } =
     cachedPr ?? {}
   const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
@@ -52,6 +55,7 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     mergeable &&
     mergeableState === 'clean' &&
     reviews?.some(review => review.state === 'APPROVED')
+
   const reasons = () => {
     const reasons: string[] = []
 
@@ -69,35 +73,47 @@ export const prActions = async (prChoice: number): Promise<ActionChoice> => {
     }
     return 'Not mergeable: \n' + reasons.join('\n')
   }
+
   const mergeDisplayOption = isMergeable ? 'Merge' : reasons()
 
-  const actionChoice = await select({
-    message: 'Select an action:',
-    choices: [
+  try {
+    const action: ActionChoice = await select(
       {
-        name: 'Open GitHub',
-        value: 'url',
+        message: 'Select an action:',
+        choices: [
+          {
+            name: 'Open GitHub',
+            value: 'url',
+          },
+          {
+            name: 'Generate Linear Report',
+            value: 'linear',
+          },
+          {
+            name: slackOption,
+            value: 'slack',
+          },
+          {
+            name: mergeDisplayOption,
+            value: 'merge',
+            disabled: !isMergeable,
+          },
+          {
+            name: '⬅️  Go Back',
+            value: 'back',
+          },
+        ],
+        theme,
       },
-      {
-        name: 'Generate Linear Report',
-        value: 'linear',
-      },
-      {
-        name: slackOption,
-        value: 'slack',
-      },
-      {
-        name: mergeDisplayOption,
-        value: 'merge',
-        disabled: !isMergeable,
-      },
-      {
-        name: '⬅️  Go Back',
-        value: 'back',
-      },
-    ],
-    theme,
-  })
+      context
+    )
+    actionChoice = action
+  } catch (error) {
+    if (error.message.includes('Prompt was aborted')) {
+      return actionChoice
+    }
+    console.error(error)
+  }
 
-  return actionChoice as ActionChoice
+  return actionChoice
 }

@@ -1,4 +1,4 @@
-import { handleMenuFlow } from './utils/menu'
+import { loopToMain } from './utils/menu'
 import { cache } from './cache'
 import { styleText } from 'util'
 import { getPRs } from './utils/api'
@@ -33,4 +33,4 @@ try {
   console.error('Error fetching PRs:', err)
 }
 
-await handleMenuFlow()
+await loopToMain()

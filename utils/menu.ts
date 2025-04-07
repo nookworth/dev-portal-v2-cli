@@ -6,7 +6,23 @@ import { mergePullRequest } from './api'
 import { goodbyeMessages } from '../constants'
 import { ActionChoice } from '../types'
 
-export const handleMenuFlow = async () => {
+export const getContext = (clearPromptOnDone: boolean = true) => {
+  const abortController = new AbortController()
+
+  process.stdin.on('keypress', async (_, key) => {
+    if (key.name === 'escape') {
+      process.stdin.removeAllListeners('keypress')
+      abortController.abort()
+    }
+  })
+
+  return {
+    clearPromptOnDone,
+    signal: abortController.signal,
+  }
+}
+
+export const loopToMain = async () => {
   const prChoice = await mainMenu()
 
   if (prChoice === 0) {
@@ -28,15 +44,7 @@ export const resolveActionChoice = async (
 ) => {
   switch (actionChoice) {
     case 'back': {
-      const prChoice = await mainMenu()
-
-      if (prChoice === 0) {
-        console.log('Goodbye 👋')
-        process.exit(0)
-      }
-
-      const newAction = await prActions(prChoice)
-      await resolveActionChoice(newAction, prChoice)
+      await loopToMain()
     }
 
     case 'linear': {
