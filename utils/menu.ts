@@ -1,6 +1,11 @@
 import { prActions, mainMenu, createPr } from '../menus'
 import { cache } from '../cache'
-import { deleteSlackPost, fetchLinearReport, postToSlack } from './api'
+import {
+  deleteSlackPost,
+  fetchLinearReport,
+  postToSlack,
+  fetchIndividualPR,
+} from './api'
 import { exec } from 'child_process'
 import { mergePullRequest } from './api'
 import { goodbyeMessages } from '../constants'
@@ -59,6 +64,43 @@ export const resolveActionChoice = async (
         branchName: head.ref ?? '',
         prNumber: number.toString(),
       })
+
+      const newAction = await prActions(prChoice)
+      await resolveActionChoice(newAction, prChoice)
+    }
+
+    case 'refresh': {
+      const cachedPr = cache.prs[prChoice]
+      const fetchedPR = await fetchIndividualPR(prChoice)
+
+      if (fetchedPR) {
+        const {
+          head,
+          html_url: url,
+          mergeable,
+          mergeable_state: mergeableState,
+          number,
+          reviews,
+          state,
+          status,
+          title,
+        } = fetchedPR
+        const { ref, sha } = head
+
+        cache.prs[number] = {
+          head: { ref, sha },
+          reviews,
+          mergeable,
+          mergeableState,
+          number,
+          postedToSlack: cachedPr?.postedToSlack,
+          reviewTs: cachedPr?.reviewTs,
+          state,
+          status,
+          title,
+          url,
+        }
+      }
 
       const newAction = await prActions(prChoice)
       await resolveActionChoice(newAction, prChoice)

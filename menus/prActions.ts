@@ -49,7 +49,9 @@ export const prActions = async (prChoice: number) => {
   let actionChoice: ActionChoice = 'back'
   const { mergeable, mergeableState, postedToSlack, reviews, status } =
     cachedPr ?? {}
-  const slackOption = postedToSlack ? 'Delete Slack Post' : 'Post to Slack'
+  const slackOption = postedToSlack
+    ? 'Delete Slack Post 🔗'
+    : 'Post to Slack 🔗'
   const isMergeable =
     status === 'success' &&
     mergeable &&
@@ -74,7 +76,7 @@ export const prActions = async (prChoice: number) => {
     return 'Not mergeable: \n' + reasons.join('\n')
   }
 
-  const mergeDisplayOption = isMergeable ? 'Merge' : reasons()
+  const mergeDisplayOption = isMergeable ? 'Merge ☑️' : reasons()
 
   try {
     const action: ActionChoice = await select(
@@ -82,11 +84,11 @@ export const prActions = async (prChoice: number) => {
         message: 'Select an action:',
         choices: [
           {
-            name: 'Open GitHub',
+            name: 'Open GitHub 🛠️',
             value: 'url',
           },
           {
-            name: 'Generate Linear Report',
+            name: 'Generate Linear Report 📃',
             value: 'linear',
           },
           {
@@ -99,7 +101,11 @@ export const prActions = async (prChoice: number) => {
             disabled: !isMergeable,
           },
           {
-            name: '⬅️  Go Back',
+            name: 'Refresh 🔄',
+            value: 'refresh',
+          },
+          {
+            name: 'Go Back ⬅️',
             value: 'back',
           },
         ],
