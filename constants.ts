@@ -51,15 +51,6 @@ const devFrontendReviewsChannelId = 'C039QHRA6TA'
 const deploymentBotTestChannelId = 'C089KFXCWJC'
 const channelId =
   test === 'true' ? deploymentBotTestChannelId : devFrontendReviewsChannelId
-const urlConstants = {
-  domain:
-    test === 'true'
-      ? 'http://localhost:8080'
-      : 'https://tpg-dev-portal-server.fly.dev',
-  owner: 'nookworth',
-  repo: 'tpg-dev-portal',
-  review: 'review-message',
-}
 
 // Environment variables
 const langchainApiKey = process.env.LANGCHAIN_API_KEY
@@ -76,7 +67,6 @@ const auth =
 
 owner ||= 'travelpassgroup'
 repo ||= 'travelpass.com'
-user ||= 'nookoid'
 
 export type { SlackActions }
 export {
@@ -94,6 +84,5 @@ export {
   theme,
   test,
   tpgPat,
-  urlConstants,
   user,
 }
